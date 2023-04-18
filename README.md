@@ -2,7 +2,9 @@
 
 ## by Liudmila Danilovskaya 
 
-The goal of this project is to create a machine learning pipeline to categorize messages that were sent during disaster events.  The project includes a web app where an emergency worker can input a new message and get classification results in several categories.
+The goal of this project is to create a solution which allows to effectively response to a disaster by classifying the text messages received during the disaster and further sending them to the relevant disaster response organizations. 
+
+This is achieved by creating a machine learning model that categorizes thousands of real messages that were sent during natural disaster events into one or multiple categories. The user can input a new message in the web app and get the categories of the message. 
 
 ## Datasets 
 
@@ -10,7 +12,38 @@ The goal of this project is to create a machine learning pipeline to categorize 
 	
 1. disaster_messages.csv - a dataset containing real messages that were sent during disaster events
 
+## Project structure
 
++ app
+	+ template					
+		+ master.html: main page of web app
+		+ go.html: classification result page of web app
+	+ run.py: Flask file that runs app
++ data
+	+ disaster_categories.csv: categories data to process
+	+ disaster_messages.csv: messages data to process
+	+ process_data.py: ETL script to process data
+	+ InsertDatabaseName.db: database to save clean data to
++ models
+	+ train_classifier.py: script that runs a machine learning pipeline
+	+ classifier.pkl: saved sqlite model
++ .gitignore
++ README.md
++ requirements.txt
+
+## Files desctiption
+
+**process_data.py** - the ETL script which takes the file paths of the two datasets and database, cleans the datasets, and stores the clean data into a SQLite database in the specified database file path.
+
+**train_classifier.py** - The machine learning script which takes the database file path and model file path, creates and trains a multi-output supervised model, and stores the model into a pickle file to the specified model file path.
+
+**run.py** - the script runs the web app which extracts data from the database to provide data visualisations and uses the trained model to classify new messages into 36 categories. 
+
+Additional files:
+
+**ETL Pipeline Preparation.ipynb** - a Python notebook that contains the code for the data preparation.
+
+**ML_Pipeline_Preparation.ipynb** - a Python notebook that contains the code with analysis and testing of a machine learning pipeline with various classifiers. 
 
 ## Installation and running
 
@@ -23,37 +56,37 @@ nltk
 sqlalchemy
 flask
 
-All libraries can be installed using the command: pip install -r requirements.txt 
+To install all libraries: pip install -r requirements.txt 
 
 To run the project:
 
-1. python process_data.py disaster_messages.csv disaster_categories.csv DisasterResponse.db
-
-	This creates a sqlite database DisasterResponse.db using input files "disaster_messages.csv" and "disaster_categories.csv" and a final ETL script process_data.py. 
-
-2. python train_classifier.py ../data/DisasterResponse.db classifier.pkl
+1. Run ETL script:
 	
-	This builds a machine learning model classifier.pkl using a python machine learning script train_classifier.py.
+	python process_data.py disaster_messages.csv disaster_categories.csv InsertDatabaseName.db
 
-3. python run.py
+2. Run a machine learning script:
+	
+	python train_classifier.py ../data/InsertDatabaseName.db classifier.pkl
 
-	This runs a Flask web app where using can enter a new message to classify and see the input dataset overview. 
+3. Run a Flask web app:
+
+	This runs a Flask web app 
 
 
 ## Summary of Findings
 
-3 machine learning models have been tested:
-1. RandomForestClassifier gives a high training accuracy (0.99) but low test accuracy (0.27%)
-2. MultinomialNB gives low training and test score
-3. Logistic Regression gives the highest testing score (0.32%) out of all models
+Several machine learning algorithms have been tested: 
+1. RandomForestClassifier
+2. MultinomialNB
+3. Logistic Regression
 
-Logistic Regression model has been chosen for this dataset. The parameters tuning was done using GridSearchCV which gave the following best parameters:
-{'clf__estimator__C': 1.0,
- 'clf__estimator__penalty': 'l1',
- 'clf__estimator__solver': 'saga',
- 'text_pipeline__vect__max_df': 0.85}
+The data was gathered and cleaned using the ETL script.
+
+The machine learning pipeline was created to train multi-output Logistic Regression model into various categories. 
+
+Flask app was created to give the training data overview and classify the messages the user entered. 
 
 
 ## Acknowledgments
 
-This project was done as the part of Udacity learning. 
+This project was done as the part of Udacity learning. The data have been provided by [Appen](https://appen.com/).
