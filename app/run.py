@@ -26,10 +26,13 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/DisasterResponse.db')
-df = pd.read_sql_table('DisasterResponse.db', engine)
+
+engine = create_engine('sqlite:///../data/DisasterResponse2.db')
+df = pd.read_sql_table('DisasterResponse', engine)
 
 # load model
+
+
 model = joblib.load("../models/classifier.pkl")
 
 
@@ -47,28 +50,7 @@ def index():
     category_values = df[df.columns[4:]].sum()
     
     category_values, category_names = (list(t) for t in zip(*sorted(zip(category_values, category_names), reverse=True)))
-    # create visuals
-    # TODO: Below is an example - modify to create your own visuals
-   # graphs = [
-   #     {
-    #        'data': [
-     #           Bar(
-    #                x=genre_names,
-     #               y=genre_counts
-  #              )
-    #        ],
 
-    #        'layout': {
-    #            'title': 'Distribution of Message Genres',
-   #             'yaxis': {
-   #                 'title': "Count"
-   #             },
-   #             'xaxis': {
-    #                'title': "Genre"
-   #             }
-   #         }
-   #     }
-   # ]
     graphs = [
         {
             'data': [
