@@ -3,6 +3,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
+
+    
     
 def load_data(database_filepath):
     '''
@@ -16,7 +18,7 @@ def load_data(database_filepath):
     '''
     from sqlalchemy import create_engine
     engine = create_engine('sqlite:///{}'.format(database_filepath))
-    df = pd.read_sql_table(database_filepath.split('/')[-1], con=engine)
+    df = pd.read_sql_table('DisasterResponse', con=engine)
 
     X = df['message'].values
     y = df[df.columns[4:]].values
@@ -52,7 +54,6 @@ def tokenize(text):
     tokens = word_tokenize(text)
     tokens = [word for word in tokens if word not in stopwords.words("english") and not word.isdigit()]
 
-    tokens = [PorterStemmer().stem(word) for word in tokens]
     tokens = [WordNetLemmatizer().lemmatize(word) for word in tokens]
     
     return tokens
@@ -73,17 +74,31 @@ def build_model():
     from sklearn.multioutput import MultiOutputClassifier
     from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer    
     from warnings import simplefilter
+    from sklearn.model_selection import GridSearchCV
 
     # ignore all warnings
     simplefilter(action='ignore')
     pipeline = Pipeline([
         ('text_pipeline', Pipeline([
-            ('vect', CountVectorizer(tokenizer=tokenize, max_df=0.85)),
+            ('vect', CountVectorizer(tokenizer=tokenize)),
             ('tfidf', TfidfTransformer())
         ])),
-        ('clf', MultiOutputClassifier(LogisticRegression(penalty='l1',solver='saga', C=10.0, max_iter=200)))
+        ('clf', MultiOutputClassifier(LogisticRegression()))
     ])
-    return pipeline
+    
+    parameters = [{
+    'text_pipeline__vect__max_df': [.85, 1]
+   ,'clf__estimator__penalty': ['l1', 'l2']
+   ,'clf__estimator__solver': ['saga', 'liblinear']
+   ,'clf__estimator__C': [0.1, 1., 10.]},
+    {'text_pipeline__vect__max_df': [.85, 1]
+   ,'clf__estimator__penalty': ['l2']
+   ,'clf__estimator__solver': ['lbfgs', 'saga', 'liblinear']
+   ,'clf__estimator__C': [0.1, 1., 10.]}]
+    
+    model = GridSearchCV(pipeline, parameters, n_jobs=4, cv=3)
+    
+    return model
 
 def evaluate_model(model, X_test, Y_test, category_names):
     '''
