@@ -73,7 +73,7 @@ def save_data(df, database_filename):
         df: dataframe of merged input files
     '''    
     engine = create_engine('sqlite:///{}'.format(database_filename))
-    df.to_sql(database_filename, engine, index=False)  
+    df.to_sql('DisasterResponse', engine, index=False, if_exists='replace')  
 
 def main():
     '''
@@ -97,6 +97,8 @@ def main():
 
         print('Cleaning data...')
         df = clean_data(df)
+        
+        assert len(df[df.duplicated()]) == 0
         
         print('Saving data...\n    DATABASE: {}'.format(database_filepath))
         save_data(df, database_filepath)
